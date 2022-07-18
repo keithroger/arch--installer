@@ -1,24 +1,29 @@
 #!/user/bin/env
 
-#TODO use sed to change echo commands to colored output
+# TODO use sed to change echo commands to colored output
 
 # TODO use the arch-chroot one line implimentation
 # TODO put chroot items all in one script
+
+PURP='\033[0;35m'
+ENDCOLOR='\033[0m'
 
 DISK="/dev/nvme0n1"
 EFI="/dev/nvme0n1p1"
 LFS="/dev/nvme0n1p2"
 microcode="intel-ucode"
 
-echo "Starting Arch Linux install."
+function output { echo "${PURP}$1${ENDCOLOR}"}
 
-echo "Enter a hostname: "
+output "Starting Arch Linux install."
+
+output "Enter a hostname: "
 read -r hostname
 
-echo "Enter a username: "
+output "Enter a username: "
 read -r username
 
-echo "Enter a password: "
+output "Enter a password: "
 read -r -s password
 
 echo "Partitioning $DISK."
@@ -66,9 +71,9 @@ arch-chroot /mnt ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 arch-chroot /mnt hwclock --systohc 
 
 echo "Setup users."
-echo "$password" | arch-chroot /mnt passwd 
+echo "root:$password" | arch-chroot /mnt chpasswd 
 arch-chroot /mnt useradd -m -G wheel $username
-echo $password | arch-chroot /mnt passwd $username
+echo "$username:$password" | arch-chroot /mnt chpasswd
 # TODO maybe add sudo?
 echo '%wheel ALL=(ALL:ALL) ALL' | arch-chroot /mnt EDITOR='tee -a' visudo
 
