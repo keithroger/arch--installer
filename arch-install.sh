@@ -13,7 +13,7 @@ EFI="/dev/nvme0n1p1"
 LFS="/dev/nvme0n1p2"
 microcode="intel-ucode"
 
-function output { echo "${PURP}$1${ENDCOLOR}"}
+function output { echo "${PURP}$1${ENDCOLOR}";}
 
 output "Starting Arch Linux install."
 
