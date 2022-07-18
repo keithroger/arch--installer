@@ -66,10 +66,11 @@ arch-chroot /mnt ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 arch-chroot /mnt hwclock --systohc 
 
 echo "Setup users."
-arch-chroot /mnt echo "$password" | passwd
+echo "$password" | arch-chroot /mnt passwd 
 arch-chroot /mnt useradd -m -G wheel $username
-arch-chroot /mnt echo $password | passwd $username
-arch-chroot /mnt echo '%wheel ALL=(ALL:ALL) ALL' | sudo EDITOR='tee -a' visudo
+echo $password | arch-chroot /mnt passwd $username
+# TODO maybe add sudo?
+echo '%wheel ALL=(ALL:ALL) ALL' | arch-chroot /mnt EDITOR='tee -a' visudo
 
 echo "Setting up GRUB"
 arch-chroot /mnt mkdir /boot/efi
