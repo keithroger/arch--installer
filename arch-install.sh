@@ -13,7 +13,7 @@ EFI="/dev/nvme0n1p1"
 LFS="/dev/nvme0n1p2"
 microcode="intel-ucode"
 
-function output { echo "${PURP}$1${ENDCOLOR}";}
+function output { echo -e "${PURP}$1${ENDCOLOR}";}
 
 output "Starting Arch Linux install."
 
@@ -75,7 +75,8 @@ echo "root:$password" | arch-chroot /mnt chpasswd
 arch-chroot /mnt useradd -m -G wheel $username
 echo "$username:$password" | arch-chroot /mnt chpasswd
 # TODO maybe add sudo?
-echo '%wheel ALL=(ALL:ALL) ALL' | arch-chroot /mnt EDITOR='tee -a' visudo
+# echo '%wheel ALL=(ALL:ALL) ALL' | arch-chroot /mnt EDITOR='tee -a' visudo
+echo "%wheel ALL=(ALL:ALL) ALL" > /mnt/etc/sudoers
 
 echo "Setting up GRUB"
 arch-chroot /mnt mkdir /boot/efi
