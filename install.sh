@@ -70,6 +70,9 @@ echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 arch-chroot /mnt ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 arch-chroot /mnt hwclock --systohc 
 
+output "Run mkinicpio"
+arch-chroot /mnt mkinicpio -P
+
 output "Setup Users."
 echo "root:$password" | arch-chroot /mnt chpasswd 
 arch-chroot /mnt useradd -m -G wheel $username
