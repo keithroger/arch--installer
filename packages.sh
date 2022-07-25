@@ -14,4 +14,6 @@ config config --local status.showUntrackedFiles no
 
 cp /home/kro/.config/X11/xorg.conf.d/30-touchpad.conf
 
+git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+ ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 
