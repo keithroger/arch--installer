@@ -10,6 +10,7 @@ pacman -S git firefox htop ranger tree thunar rofi zathura zathura-pdf-mupdf  \
 
 echo ".cfg" > /mnt/home/kro/.gitignore
 git clone --bare git@github.com:keithroger/dotfiles.git $HOME/.cfg
+config config --local status.showUntrackedFiles no
 
 cp /home/kro/.config/X11/xorg.conf.d/30-touchpad.conf
 
