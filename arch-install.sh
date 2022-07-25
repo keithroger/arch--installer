@@ -76,7 +76,9 @@ arch-chroot /mnt useradd -m -G wheel $username
 echo "$username:$password" | arch-chroot /mnt chpasswd
 # TODO maybe add sudo?
 # echo '%wheel ALL=(ALL:ALL) ALL' | arch-chroot /mnt EDITOR='tee -a' visudo
-echo "%wheel ALL=(ALL:ALL) ALL" > /mnt/etc/sudoers
+# echo "%wheel ALL=(ALL:ALL) ALL" > /mnt/etc/sudoers.d/wheel
+arch-chroot /mnt sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+arch-chroot /mnt sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 echo "Setting up GRUB"
 arch-chroot /mnt mkdir /boot/efi
@@ -87,3 +89,12 @@ arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 echo "Enabling Network Manager"
 arch-chroot /mnt systemctl enable NetworkManager
 
+pacstrap /mnt git firefox htop ranger tree thunar rofi zathura zathura-pdf-mupdf  \
+    xorg-xmodmap xorg-xbacklight python-pipx unzip lxappearance-gtk3 sysstat \
+    ueberzug unclutter xorg xorg-xinit openssh ttf-fira-code bc libinput openssh \
+    base-devel alsa-utils pulseaudio acpilight xf86-input-synaptics ripgrep
+
+echo ".cfg" > /mnt/home/kro/.gitignore
+arch-chroot /mnt git clone --bare git@github.com:keithroger/dotfiles.git 
+
+arch-chroot /mnt cp /home/kro/.config/X11/xorg.conf.d/30-touchpad.conf
