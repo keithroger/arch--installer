@@ -33,26 +33,26 @@ parted -s "$DISK" \
     mkpart LFS ext4 513MiB 100% \
     set 1 esp on
 
-echo "Updating kernel with changes."
+output "Updating kernel with changes."
 partprobe "$DISK"
 
-echo "Partitions created:"
+output "Partitions created:"
 lsblk
 
-echo "Formating partitions"
+output "Formating partitions"
 mkfs.fat -F 32 "$EFI"
 mkfs.ext4 "$LFS"
 mount "$LFS" /mnt
 
-echo "Installing packages"
+output "Installing packages"
 pacstrap /mnt base linux linux-headers $microcode linux-firmware grub \
-    efibootmgr kitty networkmanager dosfstools os-prober mtools
+    efibootmgr kitty networkmanager dosfstools os-prober mtools sudo
 
-echo "Generating fstab"
+output "Generating fstab"
 genfstab -U -p /mnt >> /mnt/etc/fstab
 cat /mnt/etc/fstab
 
-echo "Adding host"
+output "Adding host"
 echo "$hostname" > /mnt/etc/hostname
 cat > /mnt/etc/hosts <<EOF
 127.0.0.1   localhost
@@ -60,7 +60,7 @@ cat > /mnt/etc/hosts <<EOF
 127.0.1.1   $hostname.localdomain   $hostname
 EOF
 
-echo "Setup local timezone."
+output "Setup local timezone."
 echo "en_US.UTF-8 UTF-8" > /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
 echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
@@ -70,31 +70,23 @@ echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 arch-chroot /mnt ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 arch-chroot /mnt hwclock --systohc 
 
-echo "Setup users."
+output "Setup Users."
 echo "root:$password" | arch-chroot /mnt chpasswd 
 arch-chroot /mnt useradd -m -G wheel $username
 echo "$username:$password" | arch-chroot /mnt chpasswd
 # TODO maybe add sudo?
 # echo '%wheel ALL=(ALL:ALL) ALL' | arch-chroot /mnt EDITOR='tee -a' visudo
-# echo "%wheel ALL=(ALL:ALL) ALL" > /mnt/etc/sudoers.d/wheel
-arch-chroot /mnt sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
-arch-chroot /mnt sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+echo "%wheel ALL=(ALL) ALL" > /mnt/etc/sudoers.d/wheel
+# arch-chroot /mnt sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+# arch-chroot /mnt sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
-echo "Setting up GRUB"
+output "Setting up GRUB"
 arch-chroot /mnt mkdir /boot/efi
 arch-chroot /mnt mount $EFI /boot/efi
 arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck --removable
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+systemctl daemon-reload
 
-echo "Enabling Network Manager"
+output "Enabling Network Manager"
 arch-chroot /mnt systemctl enable NetworkManager
 
-pacstrap /mnt git firefox htop ranger tree thunar rofi zathura zathura-pdf-mupdf  \
-    xorg-xmodmap xorg-xbacklight python-pipx unzip lxappearance-gtk3 sysstat \
-    ueberzug unclutter xorg xorg-xinit openssh ttf-fira-code bc libinput openssh \
-    base-devel alsa-utils pulseaudio acpilight xf86-input-synaptics ripgrep
-
-echo ".cfg" > /mnt/home/kro/.gitignore
-arch-chroot /mnt git clone --bare git@github.com:keithroger/dotfiles.git 
-
-arch-chroot /mnt cp /home/kro/.config/X11/xorg.conf.d/30-touchpad.conf
